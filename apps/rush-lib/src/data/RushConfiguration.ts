@@ -783,6 +783,12 @@ export default class RushConfiguration {
       }
     }
 
+    // generate the packageJson
+    for (const project of this._projects) {
+      project.generatePackageJson(this);
+    }
+    process.exit();
+
     for (const project of this._projects) {
       project.cyclicDependencyProjects.forEach((cyclicDependencyProject: string) => {
         if (!this.getProjectByName(cyclicDependencyProject)) {

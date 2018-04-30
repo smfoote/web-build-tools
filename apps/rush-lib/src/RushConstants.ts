@@ -79,6 +79,24 @@ export namespace RushConstants {
   export const packageJsonFilename: string = 'package.json';
 
   /**
+   * The value that a dependency is expected to have
+   * in the rush-package.json if the dependency should be locally linked
+   */
+  export const rushDependendencyValue: string = 'rush-managed';
+
+  /**
+   * The value that a dependency is expected to have
+   * in the rush-package.json if the dependency should be managed by a service.
+   * The service should update the version in 'common-versions.json' to control this.
+   */
+  export const serviceDependencyValue: string = 'service-managed';
+
+  /**
+   * The filename ("rush-package.json") used by Rush to define a package.
+   */
+  export const rushPackageFilename: string = 'rush-package.json';
+
+  /**
    * The filename ("pinned-versions.json") for an old configuration file that
    * that is no longer supported.
    *

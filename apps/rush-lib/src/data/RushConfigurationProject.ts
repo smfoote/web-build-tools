@@ -3,12 +3,14 @@
 
 import * as path from 'path';
 import * as fsx from 'fs-extra';
+import * as _ from 'lodash';
 import {
   JsonFile,
   IPackageJson,
   PackageName
 } from '@microsoft/node-core-library';
 
+import { RushConstants } from '../RushConstants';
 import RushConfiguration from '../data/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 
@@ -35,7 +37,8 @@ export default class RushConfigurationProject {
   private _projectFolder: string;
   private _projectRelativeFolder: string;
   private _reviewCategory: string;
-  private _packageJson: IPackageJson;
+  private _rushPackageJson: IPackageJson;
+  private _generatedPackageJson: IPackageJson;
   private _tempProjectName: string;
   private _unscopedTempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
@@ -48,8 +51,8 @@ export default class RushConfigurationProject {
 
   /** @internal */
   constructor(projectJson: IRushConfigurationProjectJson,
-              rushConfiguration: RushConfiguration,
-              tempProjectName: string) {
+    rushConfiguration: RushConfiguration,
+    tempProjectName: string) {
     this._rushConfiguration = rushConfiguration;
     this._packageName = projectJson.packageName;
     this._projectRelativeFolder = projectJson.projectFolder;
@@ -88,12 +91,12 @@ export default class RushConfigurationProject {
       this._reviewCategory = projectJson.reviewCategory;
     }
 
-    const packageJsonFilename: string = path.join(this._projectFolder, 'package.json');
-    this._packageJson = JsonFile.load(packageJsonFilename);
+    const rushPackageJsonFilename: string = path.join(this._projectFolder, RushConstants.rushPackageFilename);
+    this._rushPackageJson = JsonFile.load(rushPackageJsonFilename);
 
-    if (this._packageJson.name !== this._packageName) {
+    if (this._rushPackageJson.name !== this._packageName) {
       throw new Error(`The package name "${this._packageName}" specified in rush.json does not`
-        + ` match the name "${this._packageJson.name}" from package.json`);
+        + ` match the name "${this._rushPackageJson.name}" from package.json`);
     }
 
     this._tempProjectName = tempProjectName;
@@ -170,10 +173,17 @@ export default class RushConfigurationProject {
   }
 
   /**
-   * The parsed NPM "package.json" file from projectFolder.
+   * The parsed Rush "rush-package.json" file from projectFolder.
+   */
+  public get rushPackageJson(): IPackageJson {
+    return this._rushPackageJson;
+  }
+
+  /**
+   * The generated NPM "package.json" file
    */
   public get packageJson(): IPackageJson {
-    return this._packageJson;
+    return this._generatedPackageJson;
   }
 
   /**
@@ -256,5 +266,57 @@ export default class RushConfigurationProject {
       }
     }
     return isMain;
+  }
+
+  /**
+   * Update the dependencies for a ruhs-package.json to conform
+   * with NPM-style package.json, given a specific RushConfiguration
+   */
+  public generatePackageJson(
+    rushConfiguration: RushConfiguration
+  ): void {
+    const generatedPackageJson: IPackageJson = _.cloneDeep(this._rushPackageJson);
+
+    this._updateDependencies(generatedPackageJson.dependencies || {}, rushConfiguration);
+    this._updateDependencies(generatedPackageJson.dependencies || {}, rushConfiguration);
+    this._generatedPackageJson = generatedPackageJson;
+    // @todo don't write this here
+    JsonFile.save(this._generatedPackageJson, path.join(this.projectFolder, RushConstants.packageJsonFilename));
+  }
+
+  private _updateDependencies(
+    dependencies: { [dependencyName: string]: string },
+    rushConfiguration: RushConfiguration
+  ): void {
+    for (const dependencyName in dependencies) {
+      if (dependencies.hasOwnProperty(dependencyName)) {
+        const dependencyValue: string = dependencies[dependencyName];
+
+        if (dependencyValue === RushConstants.rushDependendencyValue) {
+          // look up the Rush dependency and use version from its package.json
+          const locallyLinkedProject: RushConfigurationProject | undefined
+            = rushConfiguration.getProjectByName(dependencyName);
+
+          if (!locallyLinkedProject) {
+            throw new Error(`Cannot find ${RushConstants.rushDependendencyValue} dependency "${dependencyName}"`
+              + ` in the ${RushConstants.rushPackageFilename} for project "${this.packageName}".`);
+          }
+
+          dependencies[dependencyName] = locallyLinkedProject.rushPackageJson.version;
+
+        } else if (dependencyValue === RushConstants.serviceDependencyValue) {
+
+          const serviceManagedVersion: string | undefined
+            = rushConfiguration.commonVersions.xstitchPreferredVersions.get(dependencyName);
+
+          if (!serviceManagedVersion) {
+            throw new Error(`Cannot find ${RushConstants.serviceDependencyValue} dependency "${dependencyName}"`
+              + ` in the ${RushConstants.rushPackageFilename} for project "${this.packageName}".`);
+          }
+
+          dependencies[dependencyName] = serviceManagedVersion;
+        }
+      }
+    }
   }
 }
