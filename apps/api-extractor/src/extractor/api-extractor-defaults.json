@@ -1,6 +1,10 @@
 {
   // ("compiler" is required)
 
+  "experiments": {
+    "newApiJsonApproach": false
+  },
+
   "project": {
     // ("entryPointSourceFile" is required)
 

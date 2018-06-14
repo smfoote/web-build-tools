@@ -73,6 +73,21 @@ export interface IExtractorProjectConfig {
 }
 
 /**
+ * Flags used to "opt in" to experimental new features for API Extractor.
+ * No support guarantees are provided for these features.  They may be changed or
+ * removed at any time, even in a "patch" versioned release of the tool.
+ *
+ * @public
+ */
+export interface IExtractorExperimentsConfig {
+  /**
+   * If enabled, generate *.api.json outputs using the new AstSymbolTable-based analysis instead
+   * of the older AstItem-based analysis.
+   */
+  newApiJsonApproach: boolean;
+}
+
+/**
  * These policies determine how API Extractor validates various best practices for API design.
  *
  * @public
@@ -267,6 +282,11 @@ export interface IExtractorConfig {
    * Different options are available according to the configuration type.
    */
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
+
+  /**
+   * {@inheritdoc IExtractorExperimentsConfig}
+   */
+  experiments?: IExtractorExperimentsConfig;
 
   /**
    * {@inheritdoc IExtractorPoliciesConfig}

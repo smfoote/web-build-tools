@@ -192,6 +192,7 @@ interface IExtractorConfig {
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
   // @beta
   dtsRollup?: IExtractorDtsRollupConfig;
+  experiments?: IExtractorExperimentsConfig;
   policies?: IExtractorPoliciesConfig;
   project: IExtractorProjectConfig;
   validationRules?: IExtractorValidationRulesConfig;
@@ -206,6 +207,11 @@ interface IExtractorDtsRollupConfig {
   publishFolderForInternal?: string;
   publishFolderForPublic?: string;
   trimming?: boolean;
+}
+
+// @public
+interface IExtractorExperimentsConfig {
+  newApiJsonApproach: boolean;
 }
 
 // @public

@@ -13,16 +13,17 @@ export { ExternalApiHelper } from './ExternalApiHelper';
 
 export { Extractor, IAnalyzeProjectOptions, IExtractorOptions } from './extractor/Extractor';
 export {
-  IExtractorTsconfigCompilerConfig,
-  IExtractorRuntimeCompilerConfig,
-  IExtractorProjectConfig,
-  IExtractorPoliciesConfig,
   ExtractorValidationRulePolicy,
-  IExtractorValidationRulesConfig,
-  IExtractorApiReviewFileConfig,
   IExtractorApiJsonFileConfig,
+  IExtractorApiReviewFileConfig,
+  IExtractorConfig,
   IExtractorDtsRollupConfig,
-  IExtractorConfig
+  IExtractorExperimentsConfig,
+  IExtractorPoliciesConfig,
+  IExtractorProjectConfig,
+  IExtractorRuntimeCompilerConfig,
+  IExtractorTsconfigCompilerConfig,
+  IExtractorValidationRulesConfig
 } from './extractor/IExtractorConfig';
 
 export { ILogger } from './extractor/ILogger';

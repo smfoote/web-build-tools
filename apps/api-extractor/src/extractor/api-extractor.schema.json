@@ -47,6 +47,18 @@
       ]
     },
 
+    "experiments": {
+      "description": "Flags used to \"opt in\" to experimental new features for API Extractor. No support guarantees are provided for these features.  They may be changed or removed at any time, even in a \"patch\" versioned release of the tool.",
+      "type": "object",
+      "properties": {
+        "newApiJsonApproach": {
+          "description": "If enabled, generate *.api.json outputs using the new AstSymbolTable-based analysis instead of the older AstItem-based analysis.",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+
     "project": {
       "description": "Describes a specific project that will be analyzed.",
       "type": "object",
